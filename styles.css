@@ -526,3 +526,22 @@ a{ color: inherit; }
     width: 170px;
   }
 }
+.marq{
+  background:#111827;
+  color:white;
+  padding:8px;
+  font-weight:bold;
+}
+#bgVideo{
+  position: fixed;
+  top:0;
+  left:0;
+  width:100vw;
+  height:100vh;
+  object-fit:cover;
+  z-index:-10;
+}
+body{
+  position: fixed;
+  z-index: 1;
+}

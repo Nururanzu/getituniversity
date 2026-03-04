@@ -6,15 +6,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <link rel="stylesheet" href="styles.css">
-  <link rel="icon" type="image/svg+xml" href="giu-icon.svg">
+  <link rel="icon" href="icon.png">
 </head>
 <body>
-
+    <video autoplay muted loop playsinline id="bgVideo">
+  <source src="video.mp4" type="video/mp4">
+</video>
 <header class="topbar">
   <div class="container topbar__inner">
     <div class="brand">
       <div class="brand__logo brand__logo--img">
-        <img src="assets/giu-icon.svg" alt="GetItUniversity">
+        <img src="icon.png" alt="GetItUniversity">
       </div>
       <div>
         <div class="brand__name">GetItUniversity</div>
@@ -27,7 +29,9 @@
     </button>
   </div>
 </header>
-
+<marquee behavior="scroll" direction="left" scrollamount="6" class="marq">
+  🎓 Добро пожаловать в GetItUniversity — выбирай университет с умом!
+</marquee>
 <main class="container">
 
   <!-- HERO -->
@@ -57,7 +61,7 @@
       <div class="box">
         <h3>📊 Сравнение ВУЗов</h3>
         <p class="muted">
-          Сравнивайте 2–4 университета по направлениям, условиям поступления
+          <u>Сравнивайте</u> 2–4 университета по направлениям, условиям поступления
           и другим важным критериям.
         </p>
       </div>
@@ -65,7 +69,7 @@
       <div class="box">
         <h3>🗺️ Кампусы 360°</h3>
         <p class="muted">
-          Изучайте территорию университетов с помощью Street View
+          Изучайте территорию университетов с помощью <b>Street View</b>
           и получайте представление о среде обучения.
         </p>
       </div>
@@ -73,7 +77,7 @@
       <div class="box">
         <h3>🤖 Умный помощник</h3>
         <p class="muted">
-          Задавайте вопросы ИИ и получайте рекомендации по выбору
+          Задавайте вопросы ИИ и <i>получайте рекомендации</i> по выбору
           университета и направлений.
         </p>
       </div>
@@ -94,7 +98,9 @@
   </section>
 
 </main>
-
+<audio controls>
+  <source src="hello.mp3">
+</audio>
 <footer class="footer">
   <div class="container footer__inner">
     <div>© <?php echo date("Y"); ?> GetItUniversity</div>
@@ -125,6 +131,5 @@
   });
 })();
 </script>
-
 </body>
 </html>
