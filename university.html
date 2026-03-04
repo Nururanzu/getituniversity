@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ВУЗ — GetItUniversity</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="icon.png">
+</head>
+<body>
+<header class="topbar">
+  <div class="container topbar__inner">
+    <a class="brand brand--link" href="index.html">
+      <div class="brand__logo brand__logo--img">
+        <img src="icon.png" alt="GetInUniversity">
+      </div>
+      <div class="brand__text">
+        <div class="brand__name">GetInUniversity</div>
+        <div class="brand__sub">Вернуться к каталогу</div>
+      </div>
+    </a>
+  </div>
+</header>
+
+<main class="container" id="app"></main>
+
+<footer class="footer">
+  <div class="container footer__inner">
+    <div>© <span id="year"></span> GetItUniversity (demo)</div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  const esc = (s = '') => String(s).replace(/[&<>"']/g, m => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[m]));
+
+  const id = ((new URLSearchParams(location.search).get('id')) || '').trim().toLowerCase();
+  const app = document.getElementById('app');
+
+  fetch('universities.json')
+    .then(r => r.json())
+    .then(universities => {
+      const uni = universities[id] || null;
+
+      if (!uni) {
+        app.innerHTML = `
+          <section class="notfound">
+            <h1>ВУЗ не найден</h1>
+            <p class="muted">Проверь ссылку или вернись в каталог.</p>
+            <a class="btn" href="index.html">На главную</a>
+          </section>
+        `;
+        return;
+      }
+
+      document.title = `${uni.short || 'ВУЗ'} — GetInUniversity`;
+
+      const programs = (uni.programs || []).map(p => `<li>${esc(p)}</li>`).join('');
+      const steps = (uni.admission_steps || []).map(step => `<li>${esc(step)}</li>`).join('');
+      const hasInfo = uni.admission_period || uni.threshold || uni.tuition || uni.grants || uni.dorm;
+
+      app.innerHTML = `
+        <section class="uni-hero">
+          <h1 class="uni-hero__name">${esc(uni.name || '')}</h1>
+          <div class="uni-hero__meta">
+            <span class="pill">${esc(uni.city || '')}</span>
+            <span class="pill pill--soft">${esc(uni.tagline || '')}</span>
+          </div>
+          ${uni.website ? `<a class="link" href="${esc(uni.website)}" target="_blank" rel="noreferrer">Официальный сайт</a>` : `<span class="muted">Официальный сайт: добавь в data.php</span>`}
+        </section>
+
+        <section class="two-col">
+          <div class="box">
+            <h3>Описание</h3>
+            <p>${esc(uni.description || '')}</p>
+          </div>
+
+          <div class="box">
+            <h3>Популярные направления</h3>
+            <div class="chips">
+              <ol type="I">
+                <li>Бакалавриат
+                  <ul style="list-style-type:square;">
+                    ${programs}
+                  </ul>
+                </li>
+              </ol>
+            </div>
+          </div>
+
+          <div class="box">
+            <h3>Поступление и стоимость</h3>
+            ${hasInfo ? `
+              <ul>
+                ${uni.admission_period ? `<li><strong>Приёмная комиссия:</strong> ${esc(uni.admission_period)}</li>` : ''}
+                ${uni.threshold ? `<li><strong>Пороговый балл:</strong> ${esc(uni.threshold)}</li>` : ''}
+                ${uni.tuition ? `<li><strong>Стоимость обучения:</strong> ${esc(uni.tuition)}</li>` : ''}
+                ${uni.grants ? `<li><strong>Гранты/скидки:</strong> ${esc(uni.grants)}</li>` : ''}
+                ${uni.dorm ? `<li><strong>Общежитие:</strong> ${esc(uni.dorm)}</li>` : ''}
+              </ul>
+            ` : `<p class="muted">Пока нет заполненных данных.</p>`}
+          </div>
+
+          <div class="box">
+            <h3>Как поступить</h3>
+            <ul>${steps}</ul>
+          </div>
+
+          ${uni.streetview_src ? `
+            <div class="box">
+              <h3>Кампус в 360°</h3>
+              <iframe
+                src="${esc(uni.streetview_src)}"
+                width="100%"
+                height="360"
+                style="border:0; border-radius: 14px;"
+                allowfullscreen=""
+                loading="lazy">
+              </iframe>
+              <p class="muted" style="margin-top:10px;">
+                Если панорама не отображается, попробуйте выбрать другую точку Street View рядом с входом.
+              </p>
+            </div>
+          ` : `
+            <div class="box">
+              <h3>Кампус в 360°</h3>
+              <p class="muted">Панорама не добавлена.</p>
+            </div>
+          `}
+
+          <div class="box">
+            <h3>Что можешь посмотреть сам через ИИ помощник</h3>
+            <ul>
+              <li>Точные сроки приёма документов</li>
+              <li>Конкретные цены и грантовые квоты</li>
+              <li>Отзывы студентов и выпускников</li>
+              <li>Фильтры по направлениям и городам</li>
+            </ul>
+          </div>
+        </section>
+
+        <div class="backline">
+          <a class="btn btn--ghost" href="catalog.html">← Назад в каталог</a>
+        </div>
+      `;
+    });
+
+  document.getElementById('year').textContent = new Date().getFullYear();
+})();
+</script>
+</body>
+</html>

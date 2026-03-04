@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Сравнение ВУЗов — GetInUniversity</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="icon.png">
+</head>
+<body>
+<header class="topbar">
+  <div class="container topbar__inner">
+    <a class="brand brand--link" href="index.html">
+      <div class="brand__logo brand__logo--img">
+        <img src="icon.png" alt="GetInUniversity">
+      </div>
+      <div class="brand__text">
+        <div class="brand__name">GetInUniversity</div>
+        <div class="brand__sub">Сравнение университетов</div>
+      </div>
+    </a>
+  </div>
+</header>
+
+<main class="container" id="app"></main>
+
+<footer class="footer">
+  <div class="container footer__inner">
+    <div>© <span id="year"></span> GetItUniversity (demo)</div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  const esc = (s = '') => String(s).replace(/[&<>"']/g, m => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[m]));
+
+  const params = new URLSearchParams(location.search);
+  let ids = params.getAll('ids[]');
+  if (!ids.length && params.get('ids')) ids = [params.get('ids')];
+  ids = [...new Set(ids.map(v => String(v).trim().toLowerCase()).filter(Boolean))];
+
+  const app = document.getElementById('app');
+  app.innerHTML = `
+    <section class="section-head" style="margin-top:26px;">
+      <h2>Сравнение ВУЗов</h2>
+      <p class="muted">Выберите 2–4 университета на главной странице.</p>
+    </section>
+  `;
+
+  fetch('universities.json')
+    .then(r => r.json())
+    .then(universities => {
+      const selected = [];
+      ids.forEach(id => {
+        if (universities[id]) selected.push([id, universities[id]]);
+      });
+      const limited = selected.slice(0, 4);
+      const selectedCount = limited.length;
+
+      if (selectedCount < 2) {
+        app.insertAdjacentHTML('beforeend', `
+          <section class="notfound">
+            <h1>Недостаточно ВУЗов для сравнения</h1>
+            <p class="muted">
+              Сейчас выбрано: ${selectedCount}.
+              Вернись на главную и отметь минимум два университета.
+            </p>
+            <a class="btn" href="index.html">Вернуться к выбору</a>
+          </section>
+        `);
+        return;
+      }
+
+      const field = (u, key) => {
+        const v = (u[key] || '').toString().trim();
+        return v ? esc(v) : '<span class="muted">Нет данных</span>';
+      };
+
+      const programs = (u) => {
+        const arr = Array.isArray(u.programs) ? u.programs : [];
+        return arr.length ? esc(arr.join(', ')) : '<span class="muted">Нет данных</span>';
+      };
+
+      const headers = limited.map(([,u]) => `
+        <th>
+          <div class="compare-head">
+            <div class="compare-head__logo">${esc(u.logo || '')}</div>
+            <div class="compare-head__short">${esc(u.short || '')}</div>
+            <div class="compare-head__city">${esc(u.city || '')}</div>
+          </div>
+        </th>
+      `).join('');
+
+      const rows = `
+        <tr><td class="row-title">Полное название</td>${limited.map(([,u]) => `<td>${esc(u.name || '')}</td>`).join('')}</tr>
+        <tr><td class="row-title">Город</td>${limited.map(([,u]) => `<td>${esc(u.city || '')}</td>`).join('')}</tr>
+        <tr><td class="row-title">Позиционирование</td>${limited.map(([,u]) => `<td>${esc(u.tagline || '')}</td>`).join('')}</tr>
+        <tr><td class="row-title">Направления (пример)</td>${limited.map(([,u]) => `<td>${programs(u)}</td>`).join('')}</tr>
+        <tr><td class="row-title">Сроки приёма / приёмная комиссия</td>${limited.map(([,u]) => `<td>${field(u, 'admission_period')}</td>`).join('')}</tr>
+        <tr><td class="row-title">Пороговый балл</td>${limited.map(([,u]) => `<td>${field(u, 'threshold')}</td>`).join('')}</tr>
+        <tr><td class="row-title">Стоимость обучения</td>${limited.map(([,u]) => `<td>${field(u, 'tuition')}</td>`).join('')}</tr>
+        <tr><td class="row-title">Гранты / скидки</td>${limited.map(([,u]) => `<td>${field(u, 'grants')}</td>`).join('')}</tr>
+        <tr><td class="row-title">Общежитие</td>${limited.map(([,u]) => `<td>${field(u, 'dorm')}</td>`).join('')}</tr>
+        <tr><td class="row-title">Официальный сайт</td>${limited.map(([,u]) => `<td>${u.website ? `<a class="link" href="${esc(u.website)}" target="_blank" rel="noreferrer">Открыть сайт</a>` : '<span class="muted">Не добавлен</span>'}</td>`).join('')}</tr>
+        <tr><td class="row-title">Страница ВУЗа на платформе</td>${limited.map(([id]) => `<td><a class="btn btn--ghost" href="university.html?id=${encodeURIComponent(id)}">Открыть</a></td>`).join('')}</tr>
+      `;
+
+      app.insertAdjacentHTML('beforeend', `
+        <div class="compare-wrap">
+          <table class="compare-table">
+            <thead>
+              <tr>
+                <th>Параметр</th>
+                ${headers}
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+
+        <div class="backline">
+          <a class="btn btn--ghost" href="catalog.html">← Изменить выбор</a>
+        </div>
+      `);
+    });
+
+  document.getElementById('year').textContent = new Date().getFullYear();
+})();
+</script>
+</body>
+</html>
