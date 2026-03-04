@@ -527,21 +527,37 @@ a{ color: inherit; }
   }
 }
 .marq{
-  background:#111827;
-  color:white;
-  padding:8px;
-  font-weight:bold;
+  background: rgba(17,24,39,0.9);
+  color: #fff;
+  padding: 8px;
+  font-weight: 700;
+  border-bottom: 1px solid var(--border);
 }
+
 #bgVideo{
   position: fixed;
-  top:0;
-  left:0;
-  width:100vw;
-  height:100vh;
-  object-fit:cover;
-  z-index:-10;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  z-index: -2;
+  opacity: 0.25;
+  pointer-events: none;
 }
-body{
+
+body::before{
+  content: "";
   position: fixed;
-  z-index: 1;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(180deg, rgba(5,8,18,0.65), rgba(5,8,18,0.82));
+  pointer-events: none;
+}
+
+:root[data-theme="official"] #bgVideo{
+  opacity: 0.08;
+}
+
+:root[data-theme="official"] body::before{
+  background: linear-gradient(180deg, rgba(255,255,255,0.78), rgba(255,255,255,0.92));
 }
