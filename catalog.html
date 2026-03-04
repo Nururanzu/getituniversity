@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Каталог университетов — GetItUniversity</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="icon.png">
+</head>
+<body>
+<header class="topbar"><div class="container topbar__inner"><a href="index.html" class="brand brand--link"><div class="brand__logo brand__logo--img"><img src="icon.png" alt="GetItUniversity"></div><div><div class="brand__name">GetItUniversity</div><div class="brand__sub">Каталог университетов</div></div></a><div style="display:flex; gap:10px; flex-wrap:wrap;"><a href="assistant.html" class="btn btn--ghost">🤖 ИИ</a><button class="btn btn--ghost" id="themeToggle">🎨 Тема</button></div></div></header>
+<div class="page-layout"><aside class="side-img side-img--left" aria-hidden="true"></aside><div class="page-center">
+<main class="container">
+<section class="box" style="margin: 18px 0;"><h3>Поиск университета</h3><div class="searchbar"><input id="uniSearch" type="text" placeholder="Например: KazNU, IT, Алматы, медицина..." autocomplete="off"><button class="btn btn--ghost" id="uniSearchClear" type="button">Сброс</button></div><div id="uniSearchInfo" class="muted" style="margin-top:8px;"></div></section>
+<section class="section-head"><h2>Университеты</h2><p>Поставь галочки у 2–4 ВУЗов и нажми «Сравнить выбранные».</p></section>
+<form class="compare-form" action="compare.html" method="get"><div class="compare-bar"><button class="btn" type="submit">Сравнить выбранные</button><span class="muted">Рекомендация: 2–4 ВУЗа для удобного сравнения</span></div><section class="grid" id="uniGrid"></section></form>
+</main>
+<footer class="footer"><div class="container footer__inner"><div>© <span id="year"></span> GetItUniversity (demo)</div><div class="muted">Школьный демо-проект</div></div></footer>
+</div><aside class="side-img side-img--right" aria-hidden="true"></aside></div>
+<script>
+const esc=(s='')=>String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+fetch('universities.json').then(r=>r.json()).then(universities=>{const grid=document.getElementById('uniGrid');Object.entries(universities).forEach(([id,u])=>{const programs=(u.programs||[]).slice(0,3).map(p=>`<span class="mini">${esc(p)}</span>`).join('');const search=[u.short,u.name,u.city,u.tagline,u.description,(u.programs||[]).join(' ')].join(' ').toLowerCase();grid.insertAdjacentHTML('beforeend',`<div class="card card--selectable uni-card" data-search="${esc(search)}"><div class="card__top"><div class="card__logo">${esc(u.logo||'')}</div><div class="card__titles"><div class="card__short">${esc(u.short||'')}</div><div class="card__name">${esc(u.name||'')}</div></div><div class="card__right"><label class="compare-inline"><input class="compare-check" type="checkbox" name="ids[]" value="${esc(id)}"/><span>Сравнить</span></label><span class="pill">${esc(u.city||'')}</span></div></div><div class="card__tagline">${esc(u.tagline||'')}</div><div class="card__programs">${programs}</div><a class="card__cta-link" href="university.html?id=${encodeURIComponent(id)}">Смотреть ВУЗ →</a></div>`);});
+const input=document.getElementById('uniSearch'),clearBtn=document.getElementById('uniSearchClear'),info=document.getElementById('uniSearchInfo');const cards=[...document.querySelectorAll('.uni-card')];function applyFilter(){const q=(input.value||'').trim().toLowerCase();let visible=0;cards.forEach(card=>{const hay=(card.getAttribute('data-search')||'').toLowerCase();const ok=!q||hay.includes(q);card.style.display=ok?'':'none';if(ok)visible++;});info.textContent=q?`Найдено: ${visible} из ${cards.length}`:'';}input.addEventListener('input',applyFilter);clearBtn.addEventListener('click',()=>{input.value='';applyFilter();input.focus();});applyFilter();
+});
+document.getElementById('year').textContent=new Date().getFullYear();
+(function(){var root=document.documentElement;var btn=document.getElementById('themeToggle');var KEY='giu-theme';function apply(theme){root.setAttribute('data-theme',theme);if(btn)btn.textContent=(theme==='official')?'🎓 Official':'⚡ Neon';}var saved=null;try{saved=localStorage.getItem(KEY);}catch(e){}apply(saved||'neon');if(btn){btn.addEventListener('click',function(){var current=root.getAttribute('data-theme')||'neon';var next=(current==='neon')?'official':'neon';try{localStorage.setItem(KEY,next);}catch(e){}apply(next);});}})();
+</script>
+</body>
+</html>
