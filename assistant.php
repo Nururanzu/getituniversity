@@ -9,7 +9,7 @@
   <div class="container topbar__inner">
     <a href="index.php" class="brand brand--link">
       <div class="brand__logo brand__logo--img">
-        <img src="assets/giu-icon.svg" alt="GetItUniversity">
+        <img src="icon.png" alt="GetItUniversity">
       </div>
       <div>
         <div class="brand__name">GetItUniversity</div>

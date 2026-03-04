@@ -10,7 +10,7 @@ if (!$message) {
   exit;
 }
 
-$apiKey = "YOUR_API_KEY";
+$apiKey = "AIzaSyDw0Zqhs_RUu0MCQEUI64TMvzG5LvimT7A";
 
 $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" . $apiKey;
 

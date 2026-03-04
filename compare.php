@@ -64,7 +64,7 @@ function renderPrograms($u) {
   <div class="container topbar__inner">
     <a class="brand brand--link" href="index.php">
       <div class="brand__logo brand__logo--img">
-        <img src="giu-icon.svg" alt="GetInUniversity">
+        <img src="icon.png" alt="GetInUniversity">
       </div>
       <div class="brand__text">
         <div class="brand__name">GetInUniversity</div>

@@ -16,7 +16,7 @@ $uni = $universities[$id] ?? null;
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title><?php echo $uni ? h($uni["short"]) . " — GetInUniversity" : "ВУЗ не найден"; ?></title>
   <link rel="stylesheet" href="styles.css" />
-  <link rel="icon" type="image/svg+xml" href="assets/giu-icon.svg">
+  <link rel="icon" href="icon.png">
 </head>
 <body>
 
@@ -24,7 +24,7 @@ $uni = $universities[$id] ?? null;
   <div class="container topbar__inner">
     <a class="brand brand--link" href="index.php">
       <div class="brand__logo brand__logo--img">
-        <img src="assets/giu-icon.svg" alt="GetInUniversity">
+        <img src="icon.png" alt="GetInUniversity">
       </div>
       <div class="brand__text">
         <div class="brand__name">GetInUniversity</div>
@@ -43,9 +43,6 @@ $uni = $universities[$id] ?? null;
     </section>
   <?php else: ?>
     <section class="uni-hero">
-      <div class="uni-hero__logo"><?php echo h($uni["logo"]); ?></div>
-      <div class="uni-hero__info">
-        <div class="uni-hero__short"><?php echo h($uni["short"]); ?></div>
         <h1 class="uni-hero__name"><?php echo h($uni["name"]); ?></h1>
         <div class="uni-hero__meta">
           <span class="pill"><?php echo h($uni["city"]); ?></span>
@@ -70,9 +67,15 @@ $uni = $universities[$id] ?? null;
       <div class="box">
         <h3>Популярные направления </h3>
         <div class="chips">
-          <?php foreach (($uni["programs"] ?? []) as $p): ?>
-            <span class="mini"><?php echo h($p); ?></span>
-          <?php endforeach; ?>
+          <ol type="I">
+  <li>Бакалавриат
+    <ul style="list-style-type:square;">
+      <?php foreach ($uni["programs"] as $prog): ?>
+        <li><?php echo $prog; ?></li>
+      <?php endforeach; ?>
+    </ul>
+  </li>
+</ol>
         </div>
       </div>
 
@@ -156,47 +159,9 @@ $uni = $universities[$id] ?? null;
         </ul>
       </div>
     </section>
-    <section class="box">
-      <h3>ИИ по этому ВУЗу </h3>
-      <div style="display:flex; gap:8px; flex-wrap:wrap;">
-        <input id="aiInputUni"
-               placeholder="Спроси про поступление, гранты, направления..."
-               style="flex:1; min-width:240px; padding:10px; border-radius:10px;">
-        <select id="aiModelUni" style="padding:10px; border-radius:10px;">
-          <option value="llama3.2">llama3.1</option>
-          <option value="llama3.2">llama3.2</option>
-        </select>
-        <button class="btn" id="aiSendUni" type="button">Спросить</button>
-      </div>
-      <div id="aiOutUni" class="muted" style="margin-top:12px; white-space: pre-wrap;"></div>
-    </section>
-
-<script>
-const UNI_ID = "<?php echo h($id); ?>";
-
-document.getElementById("aiSendUni").addEventListener("click", async () => {
-  const inp = document.getElementById("aiInputUni");
-  const out = document.getElementById("aiOutUni");
-  const model = document.getElementById("aiModelUni").value;
-
-  const text = inp.value.trim();
-  if (!text) return;
-
-  out.textContent = "Думаю...";
-
-  const r = await fetch("ollama_chat.php", {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({ message: text, model, uni_id: UNI_ID })
-  });
-
-  const data = await r.json();
-  out.textContent = data?.message?.content ?? data?.error ?? JSON.stringify(data);
-});
-</script>
-
+   
     <div class="backline">
-      <a class="btn btn--ghost" href="index.php">← Назад к университетам</a>
+      <a class="btn btn--ghost" href="catalog.php">← Назад к университетам</a>
       <a class="btn btn--ghost" href="compare.php?ids[]=<?php echo urlencode($id); ?>">
         Открыть сравнение
       </a>

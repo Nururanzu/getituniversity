@@ -21,7 +21,7 @@ function lower_txt($str) {
   <title>Каталог университетов — GetItUniversity</title>
 
   <link rel="stylesheet" href="styles.css" />
-  <link rel="icon" type="image/svg+xml" href="assets/giu-icon.svg">
+  <link rel="icon" href="icon.png">
   <!-- маленькая доп-стилизация для select в ИИ-блоке -->
 
   <style>
@@ -41,7 +41,7 @@ function lower_txt($str) {
   <div class="container topbar__inner">
     <a href="index.php" class="brand brand--link">
       <div class="brand__logo brand__logo--img">
-        <img src="assets/giu-icon.svg" alt="GetItUniversity">
+        <img src="icon.png" alt="GetItUniversity">
       </div>
       <div>
         <div class="brand__name">GetItUniversity</div>
