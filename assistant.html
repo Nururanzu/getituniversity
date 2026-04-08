@@ -15,6 +15,13 @@
     .controls{display:flex;gap:10px;margin-top:15px;}
     .controls input{flex:1;padding:10px;border-radius:8px;border:none;}
     .controls button{padding:10px 16px;border-radius:8px;border:none;background:#22c55e;color:#fff;cursor:pointer;}
+    .api-settings{margin-top:12px;background:#111827;border-radius:12px;padding:12px;color:#e5e7eb;}
+    .api-settings__row{display:flex;gap:10px;flex-wrap:wrap;}
+    .api-settings input{flex:1;min-width:240px;padding:10px;border-radius:8px;border:none;}
+    .api-settings button{padding:10px 14px;border-radius:8px;border:none;cursor:pointer;}
+    .api-settings button.secondary{background:#374151;color:#fff;}
+    .api-settings button.primary{background:#22c55e;color:#fff;}
+    .api-status{margin-top:8px;font-size:14px;color:#9ca3af;}
   </style>
 </head>
 <body>
@@ -51,22 +58,99 @@
     <input id="userInput" type="text" placeholder="Введите вопрос...">
     <button id="askBtn">Спросить</button>
   </div>
+
+  <div class="api-settings">
+    <div class="api-settings__row">
+      <input id="apiKeyInput" type="password" placeholder="Вставьте Gemini API ключ (AIza...)">
+      <button id="saveKeyBtn" class="primary" type="button">Сохранить ключ</button>
+      <button id="clearKeyBtn" class="secondary" type="button">Очистить</button>
+    </div>
+    <div id="apiKeyStatus" class="api-status"></div>
+  </div>
 </div>
 
 <script>
+const GEMINI_KEY_STORAGE = 'giu-gemini-api-key';
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function getGeminiApiKey() {
+  const keyFromStorage = localStorage.getItem(GEMINI_KEY_STORAGE);
+  const keyFromWindow = window.GEMINI_API_KEY;
+  return (keyFromStorage || keyFromWindow || '').trim();
+}
+
+function maskKey(key) {
+  if (!key) return '';
+  if (key.length <= 8) return '********';
+  return `${key.slice(0, 4)}...${key.slice(-4)}`;
+}
+
+function updateApiStatus() {
+  const status = document.getElementById('apiKeyStatus');
+  const keyInput = document.getElementById('apiKeyInput');
+  const currentKey = getGeminiApiKey();
+
+  if (currentKey) {
+    status.textContent = `Ключ сохранён: ${maskKey(currentKey)}.`;
+    if (keyInput && !keyInput.value) keyInput.placeholder = 'Ключ уже сохранён';
+  } else {
+    status.textContent = 'Ключ не задан. Вставьте ключ и нажмите «Сохранить ключ».';
+    if (keyInput) keyInput.placeholder = 'Вставьте Gemini API ключ (AIza...)';
+  }
+}
+
+async function getCandidateModels(apiKey) {
+  const preferredModels = [
+    'gemini-2.5-flash',
+    'gemini-2.0-flash',
+    'gemini-1.5-flash',
+    'gemini-1.5-pro'
+  ];
+
+  try {
+    const modelsResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+    if (!modelsResponse.ok) return preferredModels;
+
+    const payload = await modelsResponse.json();
+    const available = (payload?.models || [])
+      .filter((model) => Array.isArray(model?.supportedGenerationMethods) && model.supportedGenerationMethods.includes('generateContent'))
+      .map((model) => String(model.name || '').replace(/^models\//, ''))
+      .filter(Boolean);
+
+    if (!available.length) return preferredModels;
+
+    const availableSet = new Set(available);
+    const preferredAvailable = preferredModels.filter((model) => availableSet.has(model));
+    const flashFallbacks = available.filter((model) => model.includes('flash') && !preferredAvailable.includes(model));
+    const proFallbacks = available.filter((model) => model.includes('pro') && !preferredAvailable.includes(model) && !flashFallbacks.includes(model));
+
+    return [...preferredAvailable, ...flashFallbacks, ...proFallbacks].slice(0, 8);
+  } catch (_) {
+    return preferredModels;
+  }
+}
+
 async function sendMessage(){
   const input = document.getElementById('userInput');
   const chat = document.getElementById('chatBox');
   const text = input.value.trim();
   if(!text) return;
 
-  chat.innerHTML += `<div class="msg user">${text}</div>`;
+  chat.innerHTML += `<div class="msg user">${escapeHtml(text)}</div>`;
   input.value = '';
 
   chat.innerHTML += `<div class="msg ai" id="loading">ИИ думает...</div>`;
   chat.scrollTop = chat.scrollHeight;
 
-  const apiKey = localStorage.getItem('AIzaSyBbPlA3gs5OPXo1ZKTRVItqpATww0zgc-c') || window.AIzaSyBbPlA3gs5OPXo1ZKTRVItqpATww0zgc-c || 'AIzaSyBbPlA3gs5OPXo1ZKTRVItqpATww0zgc-c';
+  const apiKey = getGeminiApiKey();
   const body = {
     contents: [{parts: [{text: `Ты ИИ-консультант сайта GetItUniversity. Отвечай кратко и структурированно. Вопрос: ${text}`}]}]
   };
@@ -79,7 +163,7 @@ async function sendMessage(){
   }
 
   try {
-    const models = ['gemini-2.0-flash', 'gemini-1.5-flash-latest', 'gemini-1.5-flash'];
+    const models = await getCandidateModels(apiKey);
     let data = null;
     let lastError = null;
 
@@ -103,9 +187,9 @@ async function sendMessage(){
     const answer =
       data?.candidates?.[0]?.content?.parts?.[0]?.text ||
       lastError ||
-      'Ошибка ответа ИИ';
+      'Не удалось получить ответ от Gemini. Проверьте API-ключ и доступ к модели.';
 
-    chat.innerHTML += `<div class="msg ai">${String(answer).replace(/\n/g, '<br>')}</div>`;
+    chat.innerHTML += `<div class="msg ai">${escapeHtml(answer).replace(/\n/g, '<br>')}</div>`;
     chat.scrollTop = chat.scrollHeight;
   } catch (e) {
     document.getElementById('loading')?.remove();
@@ -117,6 +201,25 @@ async function sendMessage(){
 document.getElementById('askBtn').addEventListener('click', sendMessage);
 document.getElementById('userInput').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') sendMessage();
+});
+
+document.getElementById('saveKeyBtn').addEventListener('click', () => {
+  const input = document.getElementById('apiKeyInput');
+  const key = input.value.trim();
+
+  if (!key) {
+    updateApiStatus();
+    return;
+  }
+
+  localStorage.setItem(GEMINI_KEY_STORAGE, key);
+  input.value = '';
+  updateApiStatus();
+});
+
+document.getElementById('clearKeyBtn').addEventListener('click', () => {
+  localStorage.removeItem(GEMINI_KEY_STORAGE);
+  updateApiStatus();
 });
 
 (function(){
@@ -139,6 +242,8 @@ document.getElementById('userInput').addEventListener('keydown', (e) => {
     apply(next);
   });
 })();
+
+updateApiStatus();
 </script>
 
 </body>
