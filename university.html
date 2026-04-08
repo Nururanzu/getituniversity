@@ -62,6 +62,7 @@
       const programs = (uni.programs || []).map(p => `<li>${esc(p)}</li>`).join('');
       const steps = (uni.admission_steps || []).map(step => `<li>${esc(step)}</li>`).join('');
       const hasInfo = uni.admission_period || uni.threshold || uni.tuition || uni.grants || uni.dorm;
+      const hasNotes = uni.tuition_note || uni.grants_note || uni.dorm_note || uni.contacts_note;
 
       app.innerHTML = `
         <section class="uni-hero">
@@ -103,6 +104,18 @@
                 ${uni.dorm ? `<li><strong>Общежитие:</strong> ${esc(uni.dorm)}</li>` : ''}
               </ul>
             ` : `<p class="muted">Пока нет заполненных данных.</p>`}
+          </div>
+
+          <div class="box">
+            <h3>Дополнительная информация</h3>
+            ${hasNotes ? `
+              <ul>
+                ${uni.tuition_note ? `<li><strong>Примечание по стоимости:</strong> ${esc(uni.tuition_note)}</li>` : ''}
+                ${uni.grants_note ? `<li><strong>Примечание по грантам:</strong> ${esc(uni.grants_note)}</li>` : ''}
+                ${uni.dorm_note ? `<li><strong>Примечание по общежитию:</strong> ${esc(uni.dorm_note)}</li>` : ''}
+                ${uni.contacts_note ? `<li><strong>Контакты:</strong> ${esc(uni.contacts_note)}</li>` : ''}
+              </ul>
+            ` : `<p class="muted">Пока нет заполненных дополнительных сведений.</p>`}
           </div>
 
           <div class="box">

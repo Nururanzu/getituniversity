@@ -101,8 +101,12 @@
         <tr><td class="row-title">Сроки приёма / приёмная комиссия</td>${limited.map(([,u]) => `<td>${field(u, 'admission_period')}</td>`).join('')}</tr>
         <tr><td class="row-title">Пороговый балл</td>${limited.map(([,u]) => `<td>${field(u, 'threshold')}</td>`).join('')}</tr>
         <tr><td class="row-title">Стоимость обучения</td>${limited.map(([,u]) => `<td>${field(u, 'tuition')}</td>`).join('')}</tr>
+        <tr><td class="row-title">Примечание по стоимости</td>${limited.map(([,u]) => `<td>${field(u, 'tuition_note')}</td>`).join('')}</tr>
         <tr><td class="row-title">Гранты / скидки</td>${limited.map(([,u]) => `<td>${field(u, 'grants')}</td>`).join('')}</tr>
+        <tr><td class="row-title">Примечание по грантам</td>${limited.map(([,u]) => `<td>${field(u, 'grants_note')}</td>`).join('')}</tr>
         <tr><td class="row-title">Общежитие</td>${limited.map(([,u]) => `<td>${field(u, 'dorm')}</td>`).join('')}</tr>
+        <tr><td class="row-title">Примечание по общежитию</td>${limited.map(([,u]) => `<td>${field(u, 'dorm_note')}</td>`).join('')}</tr>
+        <tr><td class="row-title">Контакты приёмной комиссии</td>${limited.map(([,u]) => `<td>${field(u, 'contacts_note')}</td>`).join('')}</tr>
         <tr><td class="row-title">Официальный сайт</td>${limited.map(([,u]) => `<td>${u.website ? `<a class="link" href="${esc(u.website)}" target="_blank" rel="noreferrer">Открыть сайт</a>` : '<span class="muted">Не добавлен</span>'}</td>`).join('')}</tr>
         <tr><td class="row-title">Страница ВУЗа на платформе</td>${limited.map(([id]) => `<td><a class="btn btn--ghost" href="university.html?id=${encodeURIComponent(id)}">Открыть</a></td>`).join('')}</tr>
       `;
