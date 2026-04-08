@@ -66,7 +66,7 @@ async function sendMessage(){
   chat.innerHTML += `<div class="msg ai" id="loading">ИИ думает...</div>`;
   chat.scrollTop = chat.scrollHeight;
 
-  const apiKey = localStorage.getItem('AIzaSyDw0Zqhs_RUu0MCQEUI64TMvzG5LvimT7A') || window.AIzaSyDw0Zqhs_RUu0MCQEUI64TMvzG5LvimT7A || '';
+  const apiKey = localStorage.getItem('AIzaSyDw0Zqhs_RUu0MCQEUI64TMvzG5LvimT7A') || window.GEMINI_API_KEY || 'AIzaSyDw0Zqhs_RUu0MCQEUI64TMvzG5LvimT7A';
   const body = {
     contents: [{parts: [{text: `Ты ИИ-консультант сайта GetItUniversity. Отвечай кратко и структурированно. Вопрос: ${text}`}]}]
   };
