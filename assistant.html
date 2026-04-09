@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>ИИ-консультант — GetItUniversity</title>
+  <title>ИИ-консультант — GetInUniversity</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="styles.css">
 
@@ -25,7 +25,7 @@
         <img src="icon.png" alt="GetItUniversity">
       </div>
       <div>
-        <div class="brand__name">GetItUniversity</div>
+        <div class="brand__name">GetInUniversity</div>
         <div class="brand__sub">Каталог университетов</div>
       </div>
     </a>
@@ -37,7 +37,7 @@
 </header>
 
 <div class="chat-wrapper">
-  <h1>ИИ-консультант GetItUniversity</h1>
+  <h1>ИИ-консультант GetInUniversity</h1>
 
   <div id="chatBox" class="chat-box">
     <div class="msg ai">
@@ -83,7 +83,7 @@ async function sendMessage(){
 
   const apiKey = getGeminiApiKey();
   const body = {
-    contents: [{parts: [{text: `Ты ИИ-консультант сайта GetItUniversity. Отвечай кратко и структурированно. Вопрос: ${text}`}]}]
+    contents: [{parts: [{text: `Ты ИИ-консультант сайта GetInUniversity. Отвечай кратко и структурированно. Вопрос: ${text}`}]}]
   };
 
   if (!apiKey) {
