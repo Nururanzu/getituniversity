@@ -39,6 +39,11 @@
           <input id="uniSearch" type="text" placeholder="Например: KazNU, IT, Алматы, медицина..." autocomplete="off">
           <button class="btn btn--ghost" id="uniSearchClear" type="button">Сброс</button>
         </div>
+        <div class="city-filter" style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn btn--ghost city-filter-btn" data-city="all" type="button">Все города</button>
+          <button class="btn btn--ghost city-filter-btn" data-city="Алматы" type="button">Алматы</button>
+          <button class="btn btn--ghost city-filter-btn" data-city="Астана" type="button">Астана</button>
+        </div>
         <div id="uniSearchInfo" class="muted" style="margin-top:8px;"></div>
       </section>
 
@@ -82,6 +87,7 @@
       const input = document.getElementById('uniSearch');
       const clearBtn = document.getElementById('uniSearchClear');
       const info = document.getElementById('uniSearchInfo');
+      const cityFilterBtns = Array.from(document.querySelectorAll('.city-filter-btn'));
 
       const allItems = Object.entries(universities).map(([id, u]) => ({
         id,
@@ -92,6 +98,7 @@
       const STEP = 6;
       let visibleCount = STEP;
       let filteredItems = allItems.slice();
+      let activeCity = 'all';
       let observer = null;
 
       function cardMarkup(id, u, searchText) {
@@ -130,11 +137,11 @@
         const hasHidden = visibleCount < filteredItems.length;
         loadMoreAnchor.textContent = hasHidden ? 'Прокрути ниже, чтобы загрузить ещё университеты…' : '';
 
-        if ((input.value || '').trim()) {
-          info.textContent = `Найдено: ${filteredItems.length} из ${allItems.length}`;
-        } else {
-          info.textContent = '';
-        }
+        const query = (input.value || '').trim();
+        const cityLabel = activeCity === 'all' ? 'Все города' : activeCity;
+        info.textContent = (query || activeCity !== 'all')
+          ? `Фильтр: ${cityLabel}. Найдено: ${filteredItems.length} из ${allItems.length}`
+          : '';
       }
 
       function attachObserver() {
@@ -154,7 +161,11 @@
 
       function applyFilter() {
         const q = (input.value || '').trim().toLowerCase();
-        filteredItems = q ? allItems.filter(item => item.searchText.includes(q)) : allItems.slice();
+        filteredItems = allItems.filter(item => {
+          const byCity = activeCity === 'all' || (item.u.city || '') === activeCity;
+          const bySearch = !q || item.searchText.includes(q);
+          return byCity && bySearch;
+        });
         visibleCount = q ? filteredItems.length : STEP;
         renderCards();
       }
@@ -166,7 +177,22 @@
         input.focus();
       });
 
-      renderCards();
+      cityFilterBtns.forEach(btn => {
+        btn.addEventListener('click', function () {
+          activeCity = btn.dataset.city || 'all';
+          cityFilterBtns.forEach(b => b.classList.remove('btn--active'));
+          btn.classList.add('btn--active');
+          applyFilter();
+        });
+      });
+
+      const defaultCityBtn = cityFilterBtns.find(b => (b.dataset.city || '') === 'Алматы');
+      if (defaultCityBtn) {
+        defaultCityBtn.click();
+      } else {
+        applyFilter();
+      }
+
       attachObserver();
     });
 })();
