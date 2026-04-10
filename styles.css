@@ -284,6 +284,9 @@ a{ color: inherit; }
   grid-template-rows: auto 1fr auto auto;
   align-items: start;
   min-height: 280px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
   box-shadow: var(--shadow-tight);
   transition: transform .15s ease, border-color .15s ease, background .15s ease, box-shadow .15s ease;
 }
@@ -441,6 +444,14 @@ a{ color: inherit; }
 }
 .btn--ghost:hover{
   background: var(--surface-2);
+}
+.btn--active{
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  border-color: transparent;
+  color: #0b1020;
+}
+:root[data-theme="official"] .btn--active{
+  color: #fff;
 }
 
 /* ---------- Links ---------- */
