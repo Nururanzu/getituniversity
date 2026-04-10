@@ -280,6 +280,9 @@ a{ color: inherit; }
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
   box-shadow: var(--shadow-tight);
   transition: transform .15s ease, border-color .15s ease, background .15s ease, box-shadow .15s ease;
 }
@@ -297,6 +300,7 @@ a{ color: inherit; }
 .card__top{
   display: flex;
   gap: 12px;
+  width: 100%;
   align-items: flex-start;
   justify-content: space-between;
 }
@@ -326,11 +330,13 @@ a{ color: inherit; }
   font-size: 0.95rem;
   font-weight: 700;
   color: var(--accent);
+  text-align: left;
 }
 .card__name{
   font-size: 0.95rem;
   color: var(--muted);
   margin-top: 2px;
+  text-align: left;
 }
 
 .card__right{
@@ -359,6 +365,7 @@ a{ color: inherit; }
 .card__tagline{
   margin-top: 10px;
   font-weight: 500;
+  text-align: left;
 }
 
 .card__programs{
