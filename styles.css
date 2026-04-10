@@ -440,6 +440,14 @@ a{ color: inherit; }
 .btn--ghost:hover{
   background: var(--surface-2);
 }
+.btn--active{
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  border-color: transparent;
+  color: #0b1020;
+}
+:root[data-theme="official"] .btn--active{
+  color: #fff;
+}
 
 /* ---------- Links ---------- */
 .link{
