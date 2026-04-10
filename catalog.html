@@ -39,11 +39,7 @@
           <input id="uniSearch" type="text" placeholder="Например: KazNU, IT, Алматы, медицина..." autocomplete="off">
           <button class="btn btn--ghost" id="uniSearchClear" type="button">Сброс</button>
         </div>
-        <div class="city-filter" style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
-          <button class="btn btn--ghost city-filter-btn" data-city="all" type="button">Все города</button>
-          <button class="btn btn--ghost city-filter-btn" data-city="Алматы" type="button">Алматы</button>
-          <button class="btn btn--ghost city-filter-btn" data-city="Астана" type="button">Астана</button>
-        </div>
+        <div id="cityFilter" class="city-filter" style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;"></div>
         <div id="uniSearchInfo" class="muted" style="margin-top:8px;"></div>
       </section>
 
@@ -87,13 +83,26 @@
       const input = document.getElementById('uniSearch');
       const clearBtn = document.getElementById('uniSearchClear');
       const info = document.getElementById('uniSearchInfo');
-      const cityFilterBtns = Array.from(document.querySelectorAll('.city-filter-btn'));
+      const cityFilter = document.getElementById('cityFilter');
 
       const allItems = Object.entries(universities).map(([id, u]) => ({
         id,
         u,
         searchText: [u.short, u.name, u.city, u.tagline, u.description, (u.programs || []).join(' ')].join(' ').toLowerCase()
       }));
+
+      const cities = Array.from(new Set(allItems.map(item => item.u.city).filter(Boolean)));
+      const preferredOrder = ['Алматы', 'Астана'];
+      cities.sort((a, b) => {
+        const ai = preferredOrder.indexOf(a);
+        const bi = preferredOrder.indexOf(b);
+        if (ai !== -1 || bi !== -1) {
+          if (ai === -1) return 1;
+          if (bi === -1) return -1;
+          return ai - bi;
+        }
+        return a.localeCompare(b, 'ru');
+      });
 
       const STEP = 6;
       let visibleCount = STEP;
@@ -144,6 +153,16 @@
           : '';
       }
 
+      function renderCityFilters() {
+        if (!cityFilter) return;
+        const buttons = ['all', ...cities].map(city => {
+          const label = city === 'all' ? 'Все города' : city;
+          const activeClass = activeCity === city ? ' btn--active' : '';
+          return `<button class="btn btn--ghost city-filter-btn${activeClass}" data-city="${esc(city)}" type="button">${esc(label)}</button>`;
+        }).join('');
+        cityFilter.innerHTML = buttons;
+      }
+
       function attachObserver() {
         if (observer) observer.disconnect();
         observer = new IntersectionObserver(entries => {
@@ -177,19 +196,23 @@
         input.focus();
       });
 
-      cityFilterBtns.forEach(btn => {
-        btn.addEventListener('click', function () {
+      if (cityFilter) {
+        cityFilter.addEventListener('click', function (e) {
+          const btn = e.target.closest('.city-filter-btn');
+          if (!btn) return;
           activeCity = btn.dataset.city || 'all';
-          cityFilterBtns.forEach(b => b.classList.remove('btn--active'));
-          btn.classList.add('btn--active');
+          renderCityFilters();
           applyFilter();
         });
-      });
+      }
 
-      const defaultCityBtn = cityFilterBtns.find(b => (b.dataset.city || '') === 'Алматы');
-      if (defaultCityBtn) {
-        defaultCityBtn.click();
+      if (cities.includes('Алматы')) {
+        activeCity = 'Алматы';
+        renderCityFilters();
+        applyFilter();
       } else {
+        activeCity = 'all';
+        renderCityFilters();
         applyFilter();
       }
 
