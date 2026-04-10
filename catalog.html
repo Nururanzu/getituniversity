@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Каталог университетов — GetItUniversity</title>
+  <title>Каталог университетов — GetInUniversity</title>
 
   <link rel="stylesheet" href="styles.css" />
   <link rel="icon" href="icon.png">
@@ -16,7 +16,7 @@
         <img src="icon.png" alt="GetItUniversity">
       </div>
       <div>
-        <div class="brand__name">GetItUniversity</div>
+        <div class="brand__name">GetInUniversity</div>
         <div class="brand__sub">Каталог университетов</div>
       </div>
     </a>
@@ -39,6 +39,11 @@
           <input id="uniSearch" type="text" placeholder="Например: KazNU, IT, Алматы, медицина..." autocomplete="off">
           <button class="btn btn--ghost" id="uniSearchClear" type="button">Сброс</button>
         </div>
+        <div class="city-filter" style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn btn--ghost city-filter-btn" data-city="all" type="button">Все города</button>
+          <button class="btn btn--ghost city-filter-btn" data-city="Алматы" type="button">Алматы</button>
+          <button class="btn btn--ghost city-filter-btn" data-city="Астана" type="button">Астана</button>
+        </div>
         <div id="uniSearchInfo" class="muted" style="margin-top:8px;"></div>
       </section>
 
@@ -54,13 +59,13 @@
         </div>
 
         <section class="grid" id="uniGrid"></section>
+        <div id="catalogLoadMore" class="catalog-load-more" aria-live="polite"></div>
       </form>
     </main>
 
     <footer class="footer">
       <div class="container footer__inner">
-        <div>© <span id="year"></span> GetItUniversity (demo)</div>
-        <div class="muted">Школьный демо-проект</div>
+        <div>© <span id="year"></span> GetInUniversity</div>
       </div>
     </footer>
   </div>
@@ -78,11 +83,27 @@
     .then(r => r.json())
     .then(universities => {
       const grid = document.getElementById('uniGrid');
-      Object.entries(universities).forEach(([id, u]) => {
-        const programs = (u.programs || []).slice(0, 3).map(p => `<span class="mini">${esc(p)}</span>`).join('');
-        const searchText = [u.short, u.name, u.city, u.tagline, u.description, (u.programs || []).join(' ')].join(' ').toLowerCase();
+      const loadMoreAnchor = document.getElementById('catalogLoadMore');
+      const input = document.getElementById('uniSearch');
+      const clearBtn = document.getElementById('uniSearchClear');
+      const info = document.getElementById('uniSearchInfo');
+      const cityFilterBtns = Array.from(document.querySelectorAll('.city-filter-btn'));
 
-        grid.insertAdjacentHTML('beforeend', `
+      const allItems = Object.entries(universities).map(([id, u]) => ({
+        id,
+        u,
+        searchText: [u.short, u.name, u.city, u.tagline, u.description, (u.programs || []).join(' ')].join(' ').toLowerCase()
+      }));
+
+      const STEP = 6;
+      let visibleCount = STEP;
+      let filteredItems = allItems.slice();
+      let activeCity = 'all';
+      let observer = null;
+
+      function cardMarkup(id, u, searchText) {
+        const programs = (u.programs || []).slice(0, 3).map(p => `<span class="mini">${esc(p)}</span>`).join('');
+        return `
           <div class="card card--selectable uni-card" data-search="${esc(searchText)}">
             <div class="card__top">
               <div class="card__logo">${esc(u.logo || '')}</div>
@@ -103,31 +124,50 @@
             </div>
 
             <div class="card__tagline">${esc(u.tagline || '')}</div>
-
             <div class="card__programs">${programs}</div>
-
             <a class="card__cta-link" href="university.html?id=${encodeURIComponent(id)}">Смотреть ВУЗ →</a>
           </div>
-        `);
-      });
+        `;
+      }
 
-      const input = document.getElementById('uniSearch');
-      const clearBtn = document.getElementById('uniSearchClear');
-      const info = document.getElementById('uniSearchInfo');
-      const cards = Array.from(document.querySelectorAll('.uni-card'));
+      function renderCards() {
+        const itemsToShow = filteredItems.slice(0, visibleCount);
+        grid.innerHTML = itemsToShow.map(({ id, u, searchText }) => cardMarkup(id, u, searchText)).join('');
+
+        const hasHidden = visibleCount < filteredItems.length;
+        loadMoreAnchor.textContent = hasHidden ? 'Прокрути ниже, чтобы загрузить ещё университеты…' : '';
+
+        const query = (input.value || '').trim();
+        const cityLabel = activeCity === 'all' ? 'Все города' : activeCity;
+        info.textContent = (query || activeCity !== 'all')
+          ? `Фильтр: ${cityLabel}. Найдено: ${filteredItems.length} из ${allItems.length}`
+          : '';
+      }
+
+      function attachObserver() {
+        if (observer) observer.disconnect();
+        observer = new IntersectionObserver(entries => {
+          const target = entries[0];
+          const searchActive = Boolean((input.value || '').trim());
+          if (!target.isIntersecting || searchActive) return;
+          if (visibleCount >= filteredItems.length) return;
+
+          visibleCount = Math.min(visibleCount + STEP, filteredItems.length);
+          renderCards();
+        }, { rootMargin: '160px 0px' });
+
+        observer.observe(loadMoreAnchor);
+      }
 
       function applyFilter() {
         const q = (input.value || '').trim().toLowerCase();
-        let visible = 0;
-
-        cards.forEach(card => {
-          const hay = (card.getAttribute('data-search') || '').toLowerCase();
-          const ok = (q === '') || hay.includes(q);
-          card.style.display = ok ? '' : 'none';
-          if (ok) visible++;
+        filteredItems = allItems.filter(item => {
+          const byCity = activeCity === 'all' || (item.u.city || '') === activeCity;
+          const bySearch = !q || item.searchText.includes(q);
+          return byCity && bySearch;
         });
-
-        info.textContent = q ? `Найдено: ${visible} из ${cards.length}` : '';
+        visibleCount = q ? filteredItems.length : STEP;
+        renderCards();
       }
 
       input.addEventListener('input', applyFilter);
@@ -136,7 +176,24 @@
         applyFilter();
         input.focus();
       });
-      applyFilter();
+
+      cityFilterBtns.forEach(btn => {
+        btn.addEventListener('click', function () {
+          activeCity = btn.dataset.city || 'all';
+          cityFilterBtns.forEach(b => b.classList.remove('btn--active'));
+          btn.classList.add('btn--active');
+          applyFilter();
+        });
+      });
+
+      const defaultCityBtn = cityFilterBtns.find(b => (b.dataset.city || '') === 'Алматы');
+      if (defaultCityBtn) {
+        defaultCityBtn.click();
+      } else {
+        applyFilter();
+      }
+
+      attachObserver();
     });
 })();
 

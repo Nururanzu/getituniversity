@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>ИИ-консультант — GetItUniversity</title>
+  <title>ИИ-консультант — GetInUniversity</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="styles.css">
 
@@ -25,7 +25,7 @@
         <img src="icon.png" alt="GetItUniversity">
       </div>
       <div>
-        <div class="brand__name">GetItUniversity</div>
+        <div class="brand__name">GetInUniversity</div>
         <div class="brand__sub">Каталог университетов</div>
       </div>
     </a>
@@ -37,7 +37,7 @@
 </header>
 
 <div class="chat-wrapper">
-  <h1>ИИ-консультант GetItUniversity</h1>
+  <h1>ИИ-консультант GetInUniversity</h1>
 
   <div id="chatBox" class="chat-box">
     <div class="msg ai">
@@ -54,21 +54,36 @@
 </div>
 
 <script>
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function getGeminiApiKey() {
+  const keyFromStorage = localStorage.getItem('giu-gemini-api-key');
+  const keyFromWindow = window.GEMINI_API_KEY='AIzaSyDE4MjVo9V_n2qFjjUTrtJmwUZOkXo5IUE';
+  return (keyFromStorage || keyFromWindow || '').trim();
+}
+
 async function sendMessage(){
   const input = document.getElementById('userInput');
   const chat = document.getElementById('chatBox');
   const text = input.value.trim();
   if(!text) return;
 
-  chat.innerHTML += `<div class="msg user">${text}</div>`;
+  chat.innerHTML += `<div class="msg user">${escapeHtml(text)}</div>`;
   input.value = '';
 
   chat.innerHTML += `<div class="msg ai" id="loading">ИИ думает...</div>`;
   chat.scrollTop = chat.scrollHeight;
 
-  const apiKey = localStorage.getItem('AIzaSyBbPlA3gs5OPXo1ZKTRVItqpATww0zgc-c') || window.AIzaSyBbPlA3gs5OPXo1ZKTRVItqpATww0zgc-c || 'AIzaSyBbPlA3gs5OPXo1ZKTRVItqpATww0zgc-c';
+  const apiKey = getGeminiApiKey();
   const body = {
-    contents: [{parts: [{text: `Ты ИИ-консультант сайта GetItUniversity. Отвечай кратко и структурированно. Вопрос: ${text}`}]}]
+    contents: [{parts: [{text: `Ты ИИ-консультант сайта GetInUniversity. Отвечай кратко и структурированно. Вопрос: ${text}`}]}]
   };
 
   if (!apiKey) {
@@ -79,7 +94,7 @@ async function sendMessage(){
   }
 
   try {
-    const models = ['gemini-2.0-flash', 'gemini-1.5-flash-latest', 'gemini-1.5-flash'];
+    const models = ['gemini-1.5-flash'];
     let data = null;
     let lastError = null;
 
@@ -103,9 +118,9 @@ async function sendMessage(){
     const answer =
       data?.candidates?.[0]?.content?.parts?.[0]?.text ||
       lastError ||
-      'Ошибка ответа ИИ';
+      'Не удалось получить ответ от Gemini. Проверьте API-ключ и доступ к модели.';
 
-    chat.innerHTML += `<div class="msg ai">${String(answer).replace(/\n/g, '<br>')}</div>`;
+    chat.innerHTML += `<div class="msg ai">${escapeHtml(answer).replace(/\n/g, '<br>')}</div>`;
     chat.scrollTop = chat.scrollHeight;
   } catch (e) {
     document.getElementById('loading')?.remove();
