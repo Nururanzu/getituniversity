@@ -63,6 +63,10 @@
       const steps = (uni.admission_steps || []).map(step => `<li>${esc(step)}</li>`).join('');
       const hasInfo = uni.admission_period || uni.threshold || uni.tuition || uni.grants || uni.dorm;
       const hasNotes = uni.tuition_note || uni.grants_note || uni.dorm_note || uni.contacts_note;
+      const rating = Number(uni.rating);
+      const ratingMarkup = Number.isFinite(rating)
+        ? `<span class="pill pill--rating">⭐ Рейтинг: ${esc(rating.toFixed(1))}</span>`
+        : '<span class="pill pill--soft">Рейтинг: нет данных</span>';
 
       app.innerHTML = `
         <section class="uni-hero">
@@ -70,6 +74,7 @@
           <div class="uni-hero__meta">
             <span class="pill">${esc(uni.city || '')}</span>
             <span class="pill pill--soft">${esc(uni.tagline || '')}</span>
+            ${ratingMarkup}
           </div>
           ${uni.website ? `<a class="link" href="${esc(uni.website)}" target="_blank" rel="noreferrer">Официальный сайт</a>` : `<span class="muted">Официальный сайт: добавь в data.php</span>`}
         </section>

@@ -82,6 +82,10 @@
         const arr = Array.isArray(u.programs) ? u.programs : [];
         return arr.length ? esc(arr.join(', ')) : '<span class="muted">Нет данных</span>';
       };
+      const ratingField = (u) => {
+        const rating = Number(u.rating);
+        return Number.isFinite(rating) ? `⭐ ${esc(rating.toFixed(1))}` : '<span class="muted">Нет данных</span>';
+      };
 
       const headers = limited.map(([,u]) => `
         <th>
@@ -97,6 +101,7 @@
         <tr><td class="row-title">Полное название</td>${limited.map(([,u]) => `<td>${esc(u.name || '')}</td>`).join('')}</tr>
         <tr><td class="row-title">Город</td>${limited.map(([,u]) => `<td>${esc(u.city || '')}</td>`).join('')}</tr>
         <tr><td class="row-title">Позиционирование</td>${limited.map(([,u]) => `<td>${esc(u.tagline || '')}</td>`).join('')}</tr>
+        <tr><td class="row-title">Рейтинг</td>${limited.map(([,u]) => `<td>${ratingField(u)}</td>`).join('')}</tr>
         <tr><td class="row-title">Направления (пример)</td>${limited.map(([,u]) => `<td>${programs(u)}</td>`).join('')}</tr>
         <tr><td class="row-title">Сроки приёма / приёмная комиссия</td>${limited.map(([,u]) => `<td>${field(u, 'admission_period')}</td>`).join('')}</tr>
         <tr><td class="row-title">Пороговый балл</td>${limited.map(([,u]) => `<td>${field(u, 'threshold')}</td>`).join('')}</tr>

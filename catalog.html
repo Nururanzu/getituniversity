@@ -112,6 +112,8 @@
 
       function cardMarkup(id, u, searchText) {
         const programs = (u.programs || []).slice(0, 3).map(p => `<span class="mini">${esc(p)}</span>`).join('');
+        const rating = Number(u.rating);
+        const ratingMarkup = Number.isFinite(rating) ? `<span class="pill pill--rating">⭐ ${rating.toFixed(1)}</span>` : '';
         return `
           <div class="card card--selectable uni-card" data-search="${esc(searchText)}">
             <div class="card__top">
@@ -128,6 +130,7 @@
                   <span>Сравнить</span>
                 </label>
 
+                ${ratingMarkup}
                 <span class="pill">${esc(u.city || '')}</span>
               </div>
             </div>
